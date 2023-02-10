@@ -39,17 +39,11 @@ For other bars you'll have to figure it out yourself.
 
 Since it is made for bars rather than stdin, it makes use of signals.
 
-SIGCONT
+`SIGCONT`: Roll the slots, get money for combinations.
 
-: Roll the slots, get money for combinations.
+`SIGUSR{1,2}`: Increase or decrease bet.
 
-SIGUSR{1,2}
-
-: Increase or decrease bet.
-
-SIGINT
-
-: Show current balance.
+`SIGINT`: Show current balance.
 
 ## Configuration
 
