@@ -5,15 +5,18 @@ use std::{
     process,
     thread::sleep,
     time::{Duration, SystemTime, UNIX_EPOCH},
+    collections::HashMap,
 };
 
+// Could just return a number, but this makes it more obvious
 enum PL {
     Profit(usize),
     Loss,
 }
 
+// The absolute state
 struct Slots {
-    status: Vec<u64>,
+    status: Vec<usize>,
     ndrums: usize,
     drum: Vec<char>,
 }
@@ -22,6 +25,7 @@ impl Slots {
     fn new(ndrums: usize) -> Self {
         Slots {
             status: vec![0; ndrums],
+            // Next two will be customizable via config later
             ndrums,
             drum: "0123456789".chars().collect(),
         }
@@ -35,10 +39,9 @@ impl Slots {
         let mut source = random::default(seed);
 
         // Setting up random times between drum stops
-        let mut roll_times: Vec<u64> = vec![
-        source.read_u64() % 20 + 25; // 25 to 44 initial rolls
-        self.ndrums
-    ];
+        // 25 to 44 initial rolls
+        let mut roll_time = || {source.read_u64() % 20 + 25};
+        let mut roll_times: Vec<u64> = vec![roll_time(); self.ndrums];
         for i in 0..self.ndrums {
             let plus = source.read_u64() % 5 + 5; // 5 to 9 splits
             for element in roll_times[0..i].iter_mut() { *element += plus }
@@ -56,17 +59,36 @@ impl Slots {
             // Parallel iteration of drums and corresponding statuses
             for (wheel, limit) in zip(&mut *self.status, &roll_times) {
                 // Status update either +1 or not if hits limit
-                if time < *limit { *wheel = *wheel + 1 % 10 }
+                if time < *limit { *wheel = (*wheel + 1) % self.drum.len() }
             }
             // Time interval between status update
+            println!("{self}");
             sleep(Duration::from_millis(50));
         }
     }
 }
 
+// Only care about showing slots
+// Also to_string() for free for later use
+impl std::fmt::Display for Slots {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let display: String = self.status
+            .iter()
+            .map(|n| {self.drum[*n]})
+            .collect();
+        write!(f, "{display}")
+    }
+}
+
 fn main() {
     // Catch signals
-    let mut signals = match Signals::new(&[SIGINT, SIGUSR1]) {
+    let inputs = [
+        SIGCONT, // Play
+        SIGUSR1, // Increase bet
+        SIGUSR2, // Decrease bet
+        SIGINT, // Show balance
+    ];
+    let mut signals = match Signals::new(&inputs) {
         Ok(result) => result,
         // I guess this fails on non-linux???
         Err(err) => {
@@ -81,13 +103,22 @@ fn main() {
     let mut balance = get_balance();
     let mut bet: usize = 5;
 
+    // Initial display
+    println!("{machine} Bet: {bet}");
+
     // Game loop
     for sig in signals.forever() {
         match sig {
             // Round
-            SIGUSR1 => game_round(&mut balance, &bet, &mut machine),
+            SIGCONT => game_round(&mut balance, &bet, &mut machine),
             // Change stake
-            SIGUSR2 => todo!(),
+            SIGUSR1 => {bet += 5; println!("Bet: {bet}")}
+            SIGUSR2 => {bet -= 5; println!("Bet: {bet}")}
+            // Show balance
+            SIGINT => {
+                println!("Balance: {balance}");
+                pause()
+            }
             // Exit
             _ => break,
         }
@@ -105,4 +136,42 @@ fn get_balance() -> usize {
 
 fn game_round(balance: &mut usize, bet: &usize, machine: &mut Slots) -> () {
     machine.roll();
+    pause();
+    let result = combination_check(&machine.to_string());
+    match result {
+        // Most gamblers quit right before they're about to hit it big
+        PL::Profit(multi) => {
+            let win = bet * multi;
+            *balance += win;
+            println!("You win {win}!")
+        }
+        PL::Loss => {
+            *balance -= bet;
+            println!("Broke ass")
+        }
+    }
+    pause();
+    println!("{machine} Bet: {bet}");
 }
+
+// Convenience
+fn pause() {
+    sleep(Duration::from_secs(2))
+}
+
+// The most basic I've come up with, probably should represent real slots more
+fn combination_check(game: &String) -> PL {
+    let mut totals = HashMap::<char, usize>::new();
+    for i in game.chars() {
+        totals.entry(i).and_modify(|n| {*n += 1}).or_insert(0);
+    }
+
+    // If I fucked up here, you get no money
+    let multiplier = match totals.values().max() {
+        Some(k) => *k,
+        None => 0,
+    };
+
+    if multiplier == 0 {PL::Loss} else {PL::Profit(multiplier)}
+}
+
