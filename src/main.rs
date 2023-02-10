@@ -27,7 +27,7 @@ impl Slots {
             status: vec![0; ndrums],
             // Next two will be customizable via config later
             ndrums,
-            drum: "0123456789".chars().collect(),
+            drum: "A7JQK".chars().collect(),
         }
     }
     fn roll(&mut self) -> () {
@@ -98,7 +98,7 @@ fn main() {
     };
 
     // Set the initial state of slots
-    let mut machine = Slots::new(5);
+    let mut machine = Slots::new(3);
 
     let mut balance = get_balance();
     let mut bet: usize = 5;
@@ -115,13 +115,12 @@ fn main() {
             SIGUSR1 => {bet += 5; println!("Bet: {bet}")}
             SIGUSR2 => {bet -= 5; println!("Bet: {bet}")}
             // Show balance
-            SIGINT => {
-                println!("Balance: {balance}");
-                pause()
-            }
+            SIGINT => println!("Balance: {balance}"),
             // Exit
             _ => break,
         }
+        pause();
+        println!("{machine} Bet: {bet}");
     }
 
     // A kind goodbye
@@ -150,8 +149,6 @@ fn game_round(balance: &mut usize, bet: &usize, machine: &mut Slots) -> () {
             println!("Broke ass")
         }
     }
-    pause();
-    println!("{machine} Bet: {bet}");
 }
 
 // Convenience
