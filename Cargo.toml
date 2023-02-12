@@ -1,11 +1,12 @@
 [package]
-name = "xmobar-slots"
-version = "0.1.0"
-edition = "2021"
-
-[[bin]]
 name = "xmobet"
-path = "src/main.rs"
+description = "Slot machine for xmobar"
+repository = "https://github.com/impossibletea/xmobar-slots"
+version = "0.1.0"
+authors = [ "impossibleTea" ]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+categories = [ "command-line-utilities", "games" ]
 
 [dependencies]
 confy = "0.5.1"
