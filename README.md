@@ -5,18 +5,16 @@ Slot machine simulator designed for use in menubars. Originally intended for
 
 ## Installation
 
-Like everything else with git:
+```sh
+cargo install xmobet
+```
+
+Or like everything else with git:
 
 ```sh
 git clone https://github.com/impossibletea/xmobar-slots.git
 cd xmobar-slots
 cargo install --path .
-```
-
-… or, when I finally publish it like a grown up boy:
-
-```sh
-cargo install xmobar-slots
 ```
 
 ## Usage
