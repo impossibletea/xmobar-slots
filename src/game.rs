@@ -19,12 +19,11 @@ pub struct Account {
 }
 
 impl Account {
-    pub fn new(conf: Config) -> Self {
+    pub fn new(conf: &Config) -> Self {
         Account {
-            // Config will affect later
-            balance: 1000,
-            bet: 5,
-            inc: 5,
+            balance: conf.init_balance,
+            bet: conf.init_bet,
+            inc: conf.bet_inc,
         }
     }
 
