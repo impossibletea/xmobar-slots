@@ -1,6 +1,7 @@
 # Xmobet
 
-A small tool intended to use with menubars.
+Slot machine simulator designed for use in menubars. Originally intended for
+`xmobar`, hence the name.
 
 ## Installation
 
@@ -47,5 +48,14 @@ Since it is made for bars rather than stdin, it makes use of signals.
 
 ## Configuration
 
-TBA
+Default config on linux is `~/.config/xmobet/config.toml`. Structure (with
+default values) is as follows:
+
+```toml
+drums = 5
+symbols = '7JQKA'
+init_balance = 100
+init_bet = 5
+bet_inc = 1
+```
 
