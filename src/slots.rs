@@ -4,6 +4,7 @@ use std::{
     thread::sleep,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
+use crate::Config;
 
 // The absolute state
 pub struct Slots {
@@ -13,12 +14,13 @@ pub struct Slots {
 }
 
 impl Slots {
-    pub fn new(ndrums: usize) -> Self {
+    pub fn new(conf: &Config) -> Self {
+        let ndrums = conf.drums;
         Slots {
             status: vec![0; ndrums],
             // Next two will be customizable via config later
             ndrums,
-            drum: "A7JQK".chars().collect(),
+            drum: conf.symbols.chars().collect(),
         }
     }
     pub fn roll(&mut self) -> () {
