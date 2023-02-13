@@ -12,8 +12,8 @@ cargo install xmobet
 Or like everything else with git:
 
 ```sh
-git clone https://github.com/impossibletea/xmobar-slots.git
-cd xmobar-slots
+git clone https://github.com/impossibletea/xmobet.git
+cd xmobet
 cargo install --path .
 ```
 
@@ -27,7 +27,7 @@ Xmobar:
 Config
   { template = "}<action=`killall -SIGCONT xmobet` button=1><action=`killall -SIGUSR1 xmobet` button=4><action=`killall -SIGUSR2 xmobet` button=5><action=`killall -SIGINT xmobet` button=3>%xmobet%</action></action></action></action>{"
   , commands = 
-    [ CommandReader "~/.cargo/bin/xmobet" xmobet
+    [ Run CommandReader "~/.cargo/bin/xmobet" "xmobet"
     ]
   }
 ```
