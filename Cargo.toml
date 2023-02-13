@@ -1,7 +1,7 @@
 [package]
 name = "xmobet"
 description = "Slot machine for xmobar"
-repository = "https://github.com/impossibletea/xmobar-slots"
+repository = "https://github.com/impossibletea/xmobet"
 version = "0.1.1"
 authors = [ "impossibleTea" ]
 edition = "2021"
