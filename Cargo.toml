@@ -2,7 +2,7 @@
 name = "xmobet"
 description = "Slot machine for xmobar"
 repository = "https://github.com/impossibletea/xmobet"
-version = "0.1.1"
+version = "0.1.2"
 authors = [ "impossibleTea" ]
 edition = "2021"
 license = "MIT OR Apache-2.0"
