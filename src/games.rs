@@ -42,39 +42,28 @@ impl Account {
             inc: conf.bet_inc,
         }
     }
+}
 
-    pub fn e_bet(&mut self, side: bool) {
-        self.bet = if side {
-            self.bet
-                .checked_add(self.inc)
-                .unwrap_or(usize::MAX)
-        } else {
-            self.bet
-                .checked_sub(self.inc)
-                .unwrap_or(usize::MIN)
-        };
-        println!("Bet: {}", self.bet);
-        pause();
+pub fn e_bet(bet: &usize, inc: &usize, side: bool) -> usize {
+    if side {
+        bet.checked_add(*inc).unwrap_or(usize::MAX)
+    } else {
+        bet.checked_sub(*inc).unwrap_or(usize::MIN)
     }
+}
 
-    fn e_bal(&mut self, hit: PL) {
-        match hit {
-            // Most gamblers quit right before they're about to hit it big
-            PL::Profit(multi) => {
-                let win = self.bet * multi;
-                self.balance = self.balance
-                    .checked_add_unsigned(win)
-                    .unwrap_or(isize::MAX);
-                println!("You win {win}!")
-            }
-            PL::Loss => {
-                self.balance = self.balance
-                    .checked_sub_unsigned(self.bet)
-                    .unwrap_or(isize::MIN);
-                println!("Broke ass")
-            }
+fn e_bal(bet: &usize, balance: &isize, hit: PL) -> (isize, String) {
+    match hit {
+        // Most gamblers quit right before they're about to hit it big
+        PL::Profit(multi) => {
+            let win = bet * multi;
+            (balance.checked_add_unsigned(win).unwrap_or(isize::MAX),
+            format!("You win {win}!"))
         }
-        pause();
+        PL::Loss => {
+            (balance.checked_sub_unsigned(*bet).unwrap_or(isize::MIN),
+            format!("Broke ass"))
+        }
     }
 }
 

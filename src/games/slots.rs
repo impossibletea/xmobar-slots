@@ -67,20 +67,6 @@ impl Slots {
             sleep(Duration::from_millis(50));
         }
     }
-
-    fn combination_check(&self) -> PL {
-        let mut totals = HashMap::<char, usize>::new();
-        for i in self.to_string().chars() {
-            totals.entry(i).and_modify(|n| {*n += 1}).or_insert(0);
-        }
-
-        let multiplier = match totals.values().max() {
-            Some(k) => *k,
-            None => 0,
-        };
-
-        if multiplier == 0 {PL::Loss} else {PL::Profit(multiplier)}
-    }
 }
 
 impl std::fmt::Display for Slots {
@@ -91,5 +77,19 @@ impl std::fmt::Display for Slots {
             .collect();
         write!(f, "{display}")
     }
+}
+
+fn combination_check(slots: &Slots) -> PL {
+    let mut totals = HashMap::<char, usize>::new();
+    for i in slots.to_string().chars() {
+        totals.entry(i).and_modify(|n| {*n += 1}).or_insert(0);
+    }
+
+    let multiplier = match totals.values().max() {
+        Some(k) => *k,
+        None => 0,
+    };
+
+    if multiplier == 0 {PL::Loss} else {PL::Profit(multiplier)}
 }
 
