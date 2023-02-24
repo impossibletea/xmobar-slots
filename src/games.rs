@@ -1,25 +1,41 @@
 use std::{
     thread::sleep,
     time::Duration,
-    collections::HashMap,
 };
-use crate::slots::Slots;
-use crate::Config;
+use serde::{Serialize, Deserialize};
 
-// Could just return a number, but this makes it more obvious
+pub mod slots;
+
+#[derive(Serialize, Deserialize)]
+pub struct AccConfig {
+    init_balance: isize,
+    init_bet: usize,
+    bet_inc: usize,
+}
+
+impl std::default::Default for AccConfig {
+    fn default() -> Self {
+        Self {
+            init_balance: 100,
+            init_bet: 5,
+            bet_inc: 1,
+        }
+    }
+}
+
+pub struct Account {
+    balance: isize,
+    bet: usize,
+    inc: usize,
+}
+
 pub enum PL {
     Profit(usize),
     Loss,
 }
 
-pub struct Account {
-    pub balance: isize,
-    pub bet: usize,
-    inc: usize,
-}
-
 impl Account {
-    pub fn new(conf: &Config) -> Self {
+    pub fn new(conf: &AccConfig) -> Self {
         Account {
             balance: conf.init_balance,
             bet: conf.init_bet,
@@ -36,7 +52,9 @@ impl Account {
             self.bet
                 .checked_sub(self.inc)
                 .unwrap_or(usize::MIN)
-        }
+        };
+        println!("Bet: {}", self.bet);
+        pause();
     }
 
     fn e_bal(&mut self, hit: PL) {
@@ -56,47 +74,12 @@ impl Account {
                 println!("Broke ass")
             }
         }
+        pause();
     }
-}
-
-pub fn home(machine: &Slots, bet: &usize) {
-    println!("{machine} Bet: {bet}")
-}
-
-pub fn round(player: &mut Account, machine: &mut Slots) -> () {
-    // Roll the dice
-    machine.roll();
-    pause();
-
-    // Calculate profit
-    let result = combination_check(&machine.to_string());
-    // Change balance accordingly
-    player.e_bal(result);
-    pause();
-
-    // Display starter screen
-    home(machine, &player.bet)
 }
 
 // Convenience
 pub fn pause() {
     sleep(Duration::from_secs(2))
 }
-
-// The most basic I've come up with, probably should represent real slots more
-fn combination_check(game: &String) -> PL {
-    let mut totals = HashMap::<char, usize>::new();
-    for i in game.chars() {
-        totals.entry(i).and_modify(|n| {*n += 1}).or_insert(0);
-    }
-
-    // If I fucked up here, you get no money
-    let multiplier = match totals.values().max() {
-        Some(k) => *k,
-        None => 0,
-    };
-
-    if multiplier == 0 {PL::Loss} else {PL::Profit(multiplier)}
-}
-
 
