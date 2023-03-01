@@ -1,8 +1,10 @@
 use std::{
     thread::sleep,
     time::Duration,
+    fmt::Display,
 };
-use std::fmt::Display;
+use crate::Status;
+use signal_hook::consts::signal::*;
 use serde::{Serialize, Deserialize};
 
 pub mod slots;
@@ -61,11 +63,21 @@ impl Account {
                 self.balance.saturating_sub_unsigned(bet)
             }
         };
+        pause();
+    }
+
+    pub fn signal(&mut self, sig: i32) -> Status {
+        match sig {
+            SIGUSR1 => self.e_bet(false),
+            SIGUSR2 => self.e_bet(true),
+            _       => return Status::Selecting,
+        }
+        Status::Balancing
     }
 }
 
 pub trait Controls {
-    fn play (&self, sig: i32) -> Option<PL>;
+    fn play (&mut self, sig: i32) -> Loop;
 }
 
 pub struct Game<T: Controls + Display> {
@@ -74,13 +86,21 @@ pub struct Game<T: Controls + Display> {
     pub game: T,
 }
 
-impl<T: Controls + Display> Controls for Game<T> {
-    fn play (&self, sig: i32) -> Option<PL> {
+pub enum Loop {
+    InGame(Option<PL>),
+    Balance,
+    Exit
+}
+
+impl<T> Controls for Game<T>
+where T: Controls + Display {
+    fn play (&mut self, sig: i32) -> Loop {
         self.game.play(sig)
     }
 }
 
-impl<T: Controls + Display> Display for Game<T> {
+impl<T> Display for Game<T>
+where T: Controls + Display {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name)
     }

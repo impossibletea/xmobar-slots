@@ -5,8 +5,9 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use random::Source;
-use crate::games::{PL, Controls};
+use signal_hook::consts::signal::*;
 use serde::{Serialize, Deserialize};
+use crate::games::{self, PL, Controls, Loop};
 
 #[derive(Serialize, Deserialize)]
 pub struct SlotConfig {
@@ -92,8 +93,16 @@ impl std::fmt::Display for Slots {
 }
 
 impl Controls for Slots {
-    fn play(&self, sig: i32) -> Option<PL> {
-        todo!()
+    fn play(&mut self, sig: i32) -> Loop {
+        match sig {
+            SIGCONT => {
+                self.roll();
+                games::pause();
+                Loop::InGame(Some(self.combination_check()))
+            }
+            SIGINT => Loop::Balance,
+            _ => Loop::Exit
+        }
     }
 }
 
