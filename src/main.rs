@@ -1,21 +1,23 @@
-use std::{process, fmt::Display};
+use std::process;
 use serde::{Serialize, Deserialize};
 use signal_hook::{consts::signal::*, iterator::Signals};
 
 mod games;
-use games::{Game, Controls, Account, Loop};
+use games::{Game, Account, Loop};
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    account: games::AccConfig,
-    slots:   games::slots::SlotConfig,
+    account:  games::AccConfig,
+    slots:    games::slots::SlotConfig,
+    roulette: games::roulette::RouletteConfig,
 }
 
 impl std::default::Default for Config {
     fn default() -> Self {
         Self {
-            account: games::AccConfig::default(),
-            slots:   games::slots::SlotConfig::default(),
+            account:  games::AccConfig::default(),
+            slots:    games::slots::SlotConfig::default(),
+            roulette: games::roulette::RouletteConfig::default(),
         }
     }
 }
@@ -37,17 +39,9 @@ fn main() {
 
     let conf = confy::load("xmobet", "config").unwrap_or(Config::default());
     let mut account = Account::new(&conf.account);
-    let mut game_list = [
-        Game {
-            id:   "slots".to_string(),
-            name: "Slots".to_string(),
-            game: games::slots::Slots::new(&conf.slots),
-        },
-        //Game {
-        //    id:   "roulette".to_string(),
-        //    name: "Roulette".to_string(),
-        //    game: games::roulette::Roulette::new(&conf.roulette),
-        //},
+    let mut game_list: Vec<Game> = vec![
+        Box::new(games::slots::Slots::new(&conf.slots)),
+        Box::new(games::roulette::Roulette::new(&conf.roulette)),
     ];
     let mut selection = Selection::new(&game_list);
     let mut status = Status::Selecting;
@@ -67,7 +61,7 @@ fn main() {
             Status::Balancing => {
                 println!("Balance: {}, Bet: {}", account.balance, account.bet)
             }
-            Status::Gaming(id) => println!("{}", game_list[id].game),
+            Status::Gaming(id) => println!("{}", game_list[id]),
         }
     }
 
@@ -86,8 +80,7 @@ struct Selection {
 }
 
 impl Selection {
-    fn new<T>(list: &[Game<T>]) -> Self
-    where T: Display + Controls {
+    fn new(list: &Vec<Game>) -> Self {
         Self {
             current: 0,
             total:   list.len(),
@@ -115,11 +108,10 @@ impl Selection {
     }
 }
 
-fn game_signal<T>(game_list: &mut [Game<T>],
-                  id: usize,
-                  sig: i32,
-                  acc: &mut Account) -> Status
-where T: Controls + Display {
+fn game_signal(game_list: &mut Vec<Game>,
+               id: usize,
+               sig: i32,
+               acc: &mut Account) -> Status {
     match game_list[id].play(sig) {
         Loop::InGame(result) => if let Some(pl) = result {acc.e_bal(pl)},
         Loop::Balance => return Status::Balancing,

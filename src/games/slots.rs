@@ -7,7 +7,7 @@ use std::{
 use random::Source;
 use signal_hook::consts::signal::*;
 use serde::{Serialize, Deserialize};
-use crate::games::{self, PL, Controls, Loop};
+use crate::games::{self, PL, Controls, Loop, Playable};
 
 #[derive(Serialize, Deserialize)]
 pub struct SlotConfig {
@@ -79,6 +79,12 @@ impl Slots {
             Some(k) => return PL::Profit(*k),
             None    => return PL::Loss,
         }
+    }
+}
+
+impl Playable for Slots {
+    fn name(&self) -> String {
+        "Slot machine".to_string()
     }
 }
 

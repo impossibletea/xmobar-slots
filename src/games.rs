@@ -8,6 +8,7 @@ use signal_hook::consts::signal::*;
 use serde::{Serialize, Deserialize};
 
 pub mod slots;
+pub mod roulette;
 
 #[derive(Serialize, Deserialize)]
 pub struct AccConfig {
@@ -80,30 +81,18 @@ pub trait Controls {
     fn play (&mut self, sig: i32) -> Loop;
 }
 
-pub struct Game<T: Controls + Display> {
-    pub id:   String,
-    pub name: String,
-    pub game: T,
+pub trait Playable: Controls + Display {
+    fn name(&self) -> String {
+        "Name your shit".to_string()
+    }
 }
+
+pub type Game = Box<dyn Playable>;
 
 pub enum Loop {
     InGame(Option<PL>),
     Balance,
     Exit
-}
-
-impl<T> Controls for Game<T>
-where T: Controls + Display {
-    fn play (&mut self, sig: i32) -> Loop {
-        self.game.play(sig)
-    }
-}
-
-impl<T> Display for Game<T>
-where T: Controls + Display {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
-    }
 }
 
 pub enum PL {

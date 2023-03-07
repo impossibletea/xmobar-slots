@@ -50,10 +50,13 @@ Default config on linux is `~/.config/xmobet/config.toml`. Structure (with
 default values) is as follows:
 
 ```toml
-drums = 5
-symbols = '7JQKA'
+[account]
 init_balance = 100
 init_bet = 5
 bet_inc = 1
+
+[slots]
+drums = 5
+symbols = '7JQKA'
 ```
 
