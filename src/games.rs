@@ -30,7 +30,7 @@ impl std::default::Default for AccConfig {
 pub struct Account {
     pub balance: isize,
     pub bet:     usize,
-    inc:     usize,
+    inc:         usize,
 }
 
 impl Account {
@@ -43,11 +43,8 @@ impl Account {
     }
 
     pub fn e_bet(&mut self, side: bool) {
-        self.bet = if side {
-            self.bet.saturating_add(self.inc)
-        } else {
-            self.bet.saturating_sub(self.inc)
-        }
+        let change: isize = if side {1} else {-1};
+        self.bet = self.bet.saturating_add_signed(self.inc as isize * change);
     }
 
     pub fn e_bal(&mut self, hit: PL) {
@@ -71,20 +68,21 @@ impl Account {
         match sig {
             SIGUSR1 => self.e_bet(false),
             SIGUSR2 => self.e_bet(true),
-            _       => return Status::Selecting,
+            _       => return Status::Selecting
         }
         Status::Balancing
     }
 }
 
 pub trait Controls {
-    fn play (&mut self, sig: i32) -> Loop;
+    fn play (&mut self, sig: i32) -> Loop {
+        println!("It opens");
+        Loop::Exit
+    }
 }
 
 pub trait Playable: Controls + Display {
-    fn name(&self) -> String {
-        "Name your shit".to_string()
-    }
+    fn name(&self) -> String {"Name your shit".to_string()}
 }
 
 pub type Game = Box<dyn Playable>;
@@ -92,7 +90,7 @@ pub type Game = Box<dyn Playable>;
 pub enum Loop {
     InGame(Option<PL>),
     Balance,
-    Exit
+    Exit,
 }
 
 pub enum PL {
@@ -101,7 +99,5 @@ pub enum PL {
 }
 
 // Convenience
-pub fn pause() {
-    sleep(Duration::from_secs(2))
-}
+pub fn pause() {sleep(Duration::from_secs(2))}
 

@@ -25,9 +25,7 @@ impl Roulette {
 }
 
 impl Playable for Roulette {
-    fn name(&self) -> String {
-        "Roulette".to_string()
-    }
+    fn name(&self) -> String {"Roulette".to_string()}
 }
 
 impl std::fmt::Display for Roulette {

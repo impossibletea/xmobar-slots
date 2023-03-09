@@ -19,7 +19,7 @@ impl std::default::Default for SlotConfig {
     fn default() -> Self {
         Self {
             drums:   3,
-            symbols: String::from("7JQKA"),
+            symbols: "7JQKA".to_string(),
         }
     }
 }
@@ -56,7 +56,7 @@ impl Slots {
 
         let longest = match roll_times.last() {
             Some(time) => time.clone(),
-            None       => 69,
+            None       => 69
         };
 
         for time in 0..longest {
@@ -77,15 +77,13 @@ impl Slots {
 
         match totals.values().max() {
             Some(k) if k > &0 => PL::Profit(*k),
-            _                 => PL::Loss,
+            _                 => PL::Loss
         }
     }
 }
 
 impl Playable for Slots {
-    fn name(&self) -> String {
-        "Slot machine".to_string()
-    }
+    fn name(&self) -> String {"Slot machine".to_string()}
 }
 
 impl std::fmt::Display for Slots {
@@ -107,7 +105,7 @@ impl Controls for Slots {
                 Loop::InGame(Some(self.combination_check()))
             }
             SIGINT => Loop::Balance,
-            _ => Loop::Exit
+            _      => Loop::Exit
         }
     }
 }

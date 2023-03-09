@@ -46,22 +46,23 @@ fn main() {
     let mut selection = Selection::new(&game_list);
     let mut status = Status::Selecting;
 
-    println!("{}", game_list[selection.current]);
+    println!("Welcome to the Cum Zone!");
 
     for sig in signals.forever() {
         match status {
-            Status::Selecting => status = selection.signal(sig),
-            Status::Balancing => status = account.signal(sig),
-            Status::Gaming(id) => {
-                status = game_signal(&mut game_list, id, sig, &mut account)
-            }
+            Status::Selecting  => status = selection.signal(sig),
+            Status::Balancing  => status = account.signal(sig),
+            Status::Gaming(id) => status = game_signal(&mut game_list,
+                                                       id,
+                                                       sig,
+                                                       &mut account)
         }
         match status {
-            Status::Selecting => println!("{}", game_list[selection.current]),
-            Status::Balancing => {
-                println!("Balance: {}, Bet: {}", account.balance, account.bet)
-            }
-            Status::Gaming(id) => println!("{}", game_list[id]),
+            Status::Selecting => println!("{}",
+                                          game_list[selection.current].name()),
+            Status::Balancing => println!("Balance: {}, Bet: {}",
+                                          account.balance, account.bet),
+            Status::Gaming(id) => println!("{}", game_list[id])
         }
     }
 
@@ -88,12 +89,11 @@ impl Selection {
     }
 
     fn scroll(&mut self, side: bool) {
-        let new_current = if side {
-            self.current as isize - 1
-        } else {
-            self.current as isize + 1
-        };
-        self.current = new_current.wrapping_rem(self.total as isize) as usize;
+        let change: isize = if side {1} else {-1};
+        self.current = match self.current.checked_add_signed(change) {
+            Some(result) => result % self.total,
+            None         => self.total - 1
+        }
     }
 
     fn signal(&mut self, sig: i32) -> Status {
@@ -102,7 +102,7 @@ impl Selection {
             SIGINT  => return Status::Balancing,
             SIGUSR1 => self.scroll(false),
             SIGUSR2 => self.scroll(true),
-            _       => {},
+            _       => {}
         }
         Status::Selecting
     }
@@ -114,8 +114,8 @@ fn game_signal(game_list: &mut Vec<Game>,
                acc: &mut Account) -> Status {
     match game_list[id].play(sig) {
         Loop::InGame(result) => if let Some(pl) = result {acc.e_bal(pl)},
-        Loop::Balance => return Status::Balancing,
-        Loop::Exit => return Status::Selecting,
+        Loop::Balance        => return Status::Balancing,
+        Loop::Exit           => return Status::Selecting
     }
     Status::Gaming(id)
 }
