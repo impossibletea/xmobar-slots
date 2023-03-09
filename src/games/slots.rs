@@ -18,7 +18,7 @@ pub struct SlotConfig {
 impl std::default::Default for SlotConfig {
     fn default() -> Self {
         Self {
-            drums:   5,
+            drums:   3,
             symbols: String::from("7JQKA"),
         }
     }
@@ -76,8 +76,8 @@ impl Slots {
         }
 
         match totals.values().max() {
-            Some(k) => return PL::Profit(*k),
-            None    => return PL::Loss,
+            Some(k) if k > &0 => PL::Profit(*k),
+            _                 => PL::Loss,
         }
     }
 }
