@@ -47,6 +47,8 @@ fn main() {
     let mut status = Status::Selecting;
 
     println!("Welcome to the Cum Zone!");
+    games::pause();
+    println!("{}",game_list[selection.current].name());
 
     for sig in signals.forever() {
         match status {
