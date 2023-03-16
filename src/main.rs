@@ -7,6 +7,8 @@ use games::{Game, Account, Loop};
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
+    welcome:  String,
+    bye:      String,
     account:  games::AccConfig,
     slots:    games::slots::SlotConfig,
     roulette: games::roulette::RouletteConfig,
@@ -15,6 +17,8 @@ pub struct Config {
 impl std::default::Default for Config {
     fn default() -> Self {
         Self {
+            welcome:  "Welcome to the Cum Zone!".to_string(),
+            bye:      "Come back soon!".to_string(),
             account:  games::AccConfig::default(),
             slots:    games::slots::SlotConfig::default(),
             roulette: games::roulette::RouletteConfig::default(),
@@ -46,9 +50,9 @@ fn main() {
     let mut selection = Selection::new(&game_list);
     let mut status = Status::Selecting;
 
-    println!("Welcome to the Cum Zone!");
+    println!("{}", conf.welcome);
     games::pause();
-    println!("{}",game_list[selection.current].name());
+    println!("{}", game_list[selection.current].name());
 
     for sig in signals.forever() {
         match status {
@@ -68,7 +72,7 @@ fn main() {
         }
     }
 
-    println!("Come back soon!");
+    println!("{}", conf.bye);
 }
 
 pub enum Status {
